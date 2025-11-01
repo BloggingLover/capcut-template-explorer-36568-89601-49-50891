@@ -6,8 +6,7 @@ import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-ro
 import { useEffect } from "react";
 import { App as CapApp } from '@capacitor/app';
 import { ThemeProvider } from "next-themes";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
+import { HorizontalMenu } from "@/components/HorizontalMenu";
 import Home from "./pages/Home";
 import Search from "./pages/Search";
 import TemplateDetail from "./pages/TemplateDetail";
@@ -69,32 +68,27 @@ const App = () => {
           <Sonner position="top-right" />
           <BrowserRouter>
             <BackButtonHandler />
-            <SidebarProvider defaultOpen={true}>
-              <div className="flex min-h-screen w-full">
-                <AppSidebar />
-                <div className="flex-1 flex flex-col w-full">
-                  <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
-                    <div className="flex items-center h-14 px-4 gap-2">
-                      <SidebarTrigger className="hover:bg-accent/50 transition-colors" />
-                      <h1 className="text-lg font-semibold">CapCut Templates</h1>
-                    </div>
-                  </header>
-                  <main className="flex-1">
-                    <Routes>
-                      <Route path="/" element={<Home />} />
-                      <Route path="/search" element={<Search />} />
-                      <Route path="/template/:id" element={<TemplateDetail />} />
-                      <Route path="/about" element={<AboutUs />} />
-                      <Route path="/contact" element={<ContactUs />} />
-                      <Route path="/privacy" element={<PrivacyPolicy />} />
-                      <Route path="/privacy-policy-app" element={<PrivacyPolicyApp />} />
-                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </main>
+            <div className="flex flex-col min-h-screen w-full">
+              <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
+                <div className="flex items-center h-14 px-4">
+                  <h1 className="text-lg font-semibold">CapCut Templates</h1>
                 </div>
-              </div>
-            </SidebarProvider>
+                <HorizontalMenu />
+              </header>
+              <main className="flex-1">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/search" element={<Search />} />
+                  <Route path="/template/:id" element={<TemplateDetail />} />
+                  <Route path="/about" element={<AboutUs />} />
+                  <Route path="/contact" element={<ContactUs />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/privacy-policy-app" element={<PrivacyPolicyApp />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+            </div>
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
