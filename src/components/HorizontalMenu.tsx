@@ -24,7 +24,7 @@ const menuItems = [
 export function HorizontalMenu() {
   return (
     <ScrollArea className="w-full">
-      <div className="flex gap-2 px-4 py-2">
+      <div className="flex gap-2 px-4 py-2 justify-center">
         {menuItems.map((item) => (
           item.external ? (
             <a
