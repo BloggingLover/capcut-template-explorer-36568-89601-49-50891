@@ -37,7 +37,10 @@ export function AppSidebar() {
     isActive ? "bg-accent text-accent-foreground font-medium" : "hover:bg-accent/50";
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar 
+      collapsible="icon"
+      className="border-r bg-background/80 backdrop-blur-sm"
+    >
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
