@@ -69,12 +69,6 @@ const App = () => {
           <BrowserRouter>
             <BackButtonHandler />
             <div className="flex flex-col min-h-screen w-full">
-              <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
-                <div className="flex items-center h-14 px-4">
-                  <h1 className="text-lg font-semibold">CapCut Templates</h1>
-                </div>
-                <HorizontalMenu />
-              </header>
               <main className="flex-1">
                 <Routes>
                   <Route path="/" element={<Home />} />

@@ -9,6 +9,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { TemplateGridSkeleton } from "@/components/TemplateSkeleton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PullToRefresh } from "@/components/PullToRefresh";
+import { HorizontalMenu } from "@/components/HorizontalMenu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -132,9 +133,15 @@ const Home = () => {
           <div className="flex justify-end mb-4">
             <ThemeToggle />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-center mb-4 animate-fade-in">
+          <h1 className="text-4xl md:text-5xl font-bold text-center mb-6 animate-fade-in">
             CapCut Template Finder
           </h1>
+          
+          {/* Horizontal Menu */}
+          <div className="mb-6 animate-fade-in">
+            <HorizontalMenu />
+          </div>
+          
           <p className="text-center text-lg opacity-90 mb-8 animate-slide-up">
             Discover thousands of trending templates for your videos
           </p>
