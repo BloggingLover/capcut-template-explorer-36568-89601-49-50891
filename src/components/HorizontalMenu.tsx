@@ -13,12 +13,6 @@ const menuItems = [
     icon: Star,
     external: true 
   },
-  { 
-    title: "Join Telegram Channel", 
-    url: "https://t.me/CapCutTemplateLink", 
-    icon: MessageCircle,
-    external: true 
-  },
 ];
 
 export function HorizontalMenu() {
