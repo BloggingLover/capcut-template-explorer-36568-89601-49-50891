@@ -68,7 +68,7 @@ const App = () => {
           <Sonner position="top-right" />
           <BrowserRouter>
             <BackButtonHandler />
-            <div className="flex flex-col min-h-screen w-full px-4">
+            <div className="flex flex-col min-h-screen w-full pb-20">
               <main className="flex-1">
                 <Routes>
                   <Route path="/" element={<Home />} />
