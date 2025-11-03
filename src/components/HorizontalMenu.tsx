@@ -15,7 +15,7 @@ const menuItems = [
   },
   { 
     title: "Join Telegram Channel", 
-    url: "https://t.me/YOUR_CHANNEL", 
+    url: "https://t.me/CapCutTemplateLink", 
     icon: MessageCircle,
     external: true 
   },
