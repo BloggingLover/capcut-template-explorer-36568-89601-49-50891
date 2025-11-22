@@ -1,5 +1,6 @@
 const SEARCH_API_URL = 'https://cc-search.onrender.com/';
 const COLLECTION_API_BASE_URL = 'https://cc-list.onrender.com/get_collection_templates?id=';
+const TEMPLATE_DETAIL_API_URL = 'https://cc-detail-sanikant.onrender.com/fetch-template';
 
 // API Secret for securing requests - UPDATE THIS VALUE
 const APP_SECRET = "YOUR_SECRET_API_KEY_HERE_CHANGE_ME";
@@ -174,6 +175,66 @@ export class ApiService {
     }
     
     throw lastError || new Error('Failed to search after retries');
+  }
+
+  static async getTemplateDetail(templateId: string, retries = 3): Promise<ApiResponse> {
+    const cacheKey = `template_detail_${templateId}`;
+    
+    // Try to get from cache first
+    const { CacheService } = await import('./cache');
+    const cachedData = await CacheService.get<ApiResponse>(cacheKey);
+    
+    if (cachedData) {
+      console.log('Loading template detail from cache');
+      return cachedData;
+    }
+
+    // Fetch from API with retry logic
+    const url = `${TEMPLATE_DETAIL_API_URL}?url=https://www.capcut.com/template-detail/${templateId}/`;
+    let lastError: Error | null = null;
+    
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: API_HEADERS
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch template detail');
+        }
+
+        const data: ApiResponse = await response.json();
+        
+        // Ensure data structure is valid
+        if (!data.data || !data.data.video_templates || data.data.video_templates.length === 0) {
+          console.error('Invalid response structure:', data);
+          return {
+            ret: 'error',
+            errmsg: 'Template not found',
+            data: {
+              total: 0,
+              video_templates: [],
+              has_more: false,
+            },
+          };
+        }
+        
+        // Cache the template detail
+        await CacheService.set(cacheKey, data);
+        console.log('Template detail cached successfully');
+        
+        return data;
+      } catch (error) {
+        lastError = error as Error;
+        if (attempt < retries - 1) {
+          // Wait before retrying (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+        }
+      }
+    }
+    
+    throw lastError || new Error('Failed to fetch template detail after retries');
   }
 }
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom";
-import { ArrowLeft, Users, FileText, ExternalLink, Smartphone, Play, MessageSquare } from "lucide-react";
+import { ArrowLeft, Users, FileText, ExternalLink, Smartphone, Play, MessageSquare, Share2 } from "lucide-react";
 import { ApiService, VideoTemplate, categories } from "@/services/api";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { TemplateCard } from "@/components/TemplateCard";
@@ -157,6 +157,48 @@ const TemplateDetail = () => {
     }
   };
 
+  const handleShare = async () => {
+    if (!template) return;
+
+    const shareText = `Hey! I found this awesome template \`${template.web_id}\` on the CapCut Template Finder App\n\n${template.video_url}\n\nhttps://play.google.com/store/apps/details?id=pro.templatefinder&hl=en_IN`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          text: shareText,
+        });
+        toast({
+          description: "Template shared successfully!",
+          duration: 2000,
+        });
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareText);
+        toast({
+          description: "Share text copied to clipboard!",
+          duration: 2000,
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Try clipboard as fallback
+      try {
+        await navigator.clipboard.writeText(shareText);
+        toast({
+          description: "Share text copied to clipboard!",
+          duration: 2000,
+        });
+      } catch (clipboardError) {
+        toast({
+          title: "Could not share",
+          description: "Please try again.",
+          variant: "destructive",
+          duration: 3000,
+        });
+      }
+    }
+  };
+
   const visibleRelatedTemplates = relatedTemplates.slice(0, displayedRelatedCount);
 
   if (loading) {
@@ -267,6 +309,15 @@ const TemplateDetail = () => {
 
             {/* Action Buttons */}
             <div className="space-y-3">
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handleShare}
+                className="w-full"
+              >
+                <Share2 className="w-5 h-5 mr-2" />
+                Share Template
+              </Button>
               {!isButtonUnlocked ? (
                 <Button
                   size="lg"
