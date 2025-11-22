@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { adMobService } from "@/services/admob";
 import { toast } from "@/hooks/use-toast";
+import { Share } from '@capacitor/share';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Capacitor } from '@capacitor/core';
 
 
 const TemplateDetail = () => {
@@ -168,46 +171,91 @@ const TemplateDetail = () => {
         duration: 2000,
       });
 
-      // Download the video file
-      const response = await fetch(template.video_url);
-      const blob = await response.blob();
-      
-      // Create a file from the blob
-      const file = new File([blob], `template_${template.web_id}.mp4`, { type: 'video/mp4' });
+      if (Capacitor.isNativePlatform()) {
+        // Native platform - use Capacitor Share plugin
+        try {
+          // Download video as base64
+          const response = await fetch(template.video_url);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          
+          reader.onloadend = async () => {
+            const base64Data = reader.result as string;
+            const base64 = base64Data.split(',')[1];
+            
+            // Save to filesystem
+            const fileName = `template_${template.web_id}.mp4`;
+            const savedFile = await Filesystem.writeFile({
+              path: fileName,
+              data: base64,
+              directory: Directory.Cache,
+            });
 
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        // Share video file with text
-        await navigator.share({
-          files: [file],
-          text: shareText,
-        });
-        toast({
-          description: "Template shared successfully!",
-          duration: 2000,
-        });
-      } else if (navigator.share) {
-        // Fallback to sharing text only
-        await navigator.share({
-          text: shareText,
-        });
-        toast({
-          description: "Template shared successfully!",
-          duration: 2000,
-        });
+            // Share using Capacitor Share plugin
+            await Share.share({
+              title: 'CapCut Template',
+              text: shareText,
+              url: savedFile.uri,
+              dialogTitle: 'Share Template',
+            });
+
+            // Clean up cached file
+            await Filesystem.deleteFile({
+              path: fileName,
+              directory: Directory.Cache,
+            });
+
+            toast({
+              description: "Template shared successfully!",
+              duration: 2000,
+            });
+          };
+          
+          reader.readAsDataURL(blob);
+        } catch (error) {
+          console.error('Native share error:', error);
+          // Fallback to text-only share
+          await Share.share({
+            title: 'CapCut Template',
+            text: shareText,
+            dialogTitle: 'Share Template',
+          });
+        }
       } else {
-        // Fallback: copy to clipboard
-        await navigator.clipboard.writeText(shareText);
-        toast({
-          description: "Share text copied to clipboard!",
-          duration: 2000,
-        });
+        // Web platform - use Web Share API
+        const response = await fetch(template.video_url);
+        const blob = await response.blob();
+        const file = new File([blob], `template_${template.web_id}.mp4`, { type: 'video/mp4' });
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            text: shareText,
+          });
+          toast({
+            description: "Template shared successfully!",
+            duration: 2000,
+          });
+        } else if (navigator.share) {
+          await navigator.share({
+            text: shareText,
+          });
+          toast({
+            description: "Template shared successfully!",
+            duration: 2000,
+          });
+        } else {
+          await navigator.clipboard.writeText(shareText);
+          toast({
+            description: "Share text copied to clipboard!",
+            duration: 2000,
+          });
+        }
       }
     } catch (error) {
       console.error('Error sharing:', error);
-      // Try clipboard as fallback
       try {
-        const fallbackText = `Hey! I found this awesome template \`${template.web_id}\` on the CapCut Template Finder App\n\nhttps://play.google.com/store/apps/details?id=pro.templatefinder&hl=en_IN`;
-        await navigator.clipboard.writeText(fallbackText);
+        await navigator.clipboard.writeText(shareText);
         toast({
           description: "Share text copied to clipboard!",
           duration: 2000,
