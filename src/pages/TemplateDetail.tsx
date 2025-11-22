@@ -160,10 +160,33 @@ const TemplateDetail = () => {
   const handleShare = async () => {
     if (!template) return;
 
-    const shareText = `Hey! I found this awesome template \`${template.web_id}\` on the CapCut Template Finder App\n\n${template.video_url}\n\nhttps://play.google.com/store/apps/details?id=pro.templatefinder&hl=en_IN`;
+    const shareText = `Hey! I found this awesome template \`${template.web_id}\` on the CapCut Template Finder App\n\nhttps://play.google.com/store/apps/details?id=pro.templatefinder&hl=en_IN`;
 
     try {
-      if (navigator.share) {
+      toast({
+        description: "Preparing video for sharing...",
+        duration: 2000,
+      });
+
+      // Download the video file
+      const response = await fetch(template.video_url);
+      const blob = await response.blob();
+      
+      // Create a file from the blob
+      const file = new File([blob], `template_${template.web_id}.mp4`, { type: 'video/mp4' });
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        // Share video file with text
+        await navigator.share({
+          files: [file],
+          text: shareText,
+        });
+        toast({
+          description: "Template shared successfully!",
+          duration: 2000,
+        });
+      } else if (navigator.share) {
+        // Fallback to sharing text only
         await navigator.share({
           text: shareText,
         });
@@ -183,7 +206,8 @@ const TemplateDetail = () => {
       console.error('Error sharing:', error);
       // Try clipboard as fallback
       try {
-        await navigator.clipboard.writeText(shareText);
+        const fallbackText = `Hey! I found this awesome template \`${template.web_id}\` on the CapCut Template Finder App\n\nhttps://play.google.com/store/apps/details?id=pro.templatefinder&hl=en_IN`;
+        await navigator.clipboard.writeText(fallbackText);
         toast({
           description: "Share text copied to clipboard!",
           duration: 2000,
