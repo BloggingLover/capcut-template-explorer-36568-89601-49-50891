@@ -47,7 +47,13 @@ const Search = () => {
   useEffect(() => {
     if (query) {
       setSearchQuery(query);
-      searchTemplates(query);
+      // Check if query is a numeric template ID
+      const isTemplateId = /^\d+$/.test(query.trim());
+      if (isTemplateId) {
+        searchByTemplateId(query.trim());
+      } else {
+        searchTemplates(query);
+      }
     }
   }, [query]);
 
@@ -65,6 +71,41 @@ const Search = () => {
       setDisplayedCount(TEMPLATES_PER_PAGE);
     } catch (error) {
       console.error('Error searching templates:', error);
+      setAllTemplates([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const searchByTemplateId = async (templateId: string) => {
+    setLoading(true);
+    
+    try {
+      const response = await ApiService.getTemplateDetail(templateId);
+      const templates = response.data?.video_templates || [];
+      
+      if (templates.length > 0) {
+        // Navigate directly to template detail page
+        navigate(`/template/${templateId}`, {
+          state: { template: templates[0] }
+        });
+      } else {
+        toast({
+          title: "Template not found",
+          description: "No template found with this ID.",
+          variant: "destructive",
+          duration: 3000,
+        });
+        setAllTemplates([]);
+      }
+    } catch (error) {
+      console.error('Error fetching template detail:', error);
+      toast({
+        title: "Error",
+        description: "Could not fetch template details.",
+        variant: "destructive",
+        duration: 3000,
+      });
       setAllTemplates([]);
     } finally {
       setLoading(false);
@@ -116,28 +157,12 @@ const Search = () => {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // COMMENTED FOR INITIAL RELEASE - Re-enable after AdMob approval
-      // const loadingToast = toast({
-      //   title: "Loading ad...",
-      //   duration: 2000,
-      // });
-
       try {
-        const result = await adMobService.showRewardedInterstitial();
-        if (result) {
-          navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-        }
+        await adMobService.showRewardedInterstitial();
       } catch (error: any) {
         console.error('Error showing rewarded ad:', error);
-        // COMMENTED FOR INITIAL RELEASE - Re-enable after AdMob approval
-        // toast({
-        //   title: "Ad failed to load",
-        //   description: error?.message || "Continuing to search...",
-        //   variant: "destructive",
-        //   duration: 3000,
-        // });
-        navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       }
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
