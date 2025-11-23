@@ -81,9 +81,8 @@ export class ApiService {
     
     for (let attempt = 0; attempt < retries; attempt++) {
       try {
-        const response = await fetch(url, {
-          headers: API_HEADERS
-        });
+        const response = await fetch(url);
+
         
         if (!response.ok) {
           throw new Error('Failed to fetch collection templates');
@@ -133,10 +132,8 @@ export class ApiService {
     
     for (let attempt = 0; attempt < retries; attempt++) {
       try {
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: API_HEADERS
-        });
+        const response = await fetch(url);
+
 
         if (!response.ok) {
           throw new Error('Failed to search templates');
@@ -195,10 +192,8 @@ export class ApiService {
     
     for (let attempt = 0; attempt < retries; attempt++) {
       try {
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: API_HEADERS
-        });
+        const response = await fetch(url);
+
 
         if (!response.ok) {
           throw new Error('Failed to fetch template detail');
