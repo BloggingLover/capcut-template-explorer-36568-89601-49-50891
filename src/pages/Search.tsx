@@ -47,8 +47,8 @@ const Search = () => {
   useEffect(() => {
     if (query) {
       setSearchQuery(query);
-      // Check if query is a numeric template ID
-      const isTemplateId = /^\d+$/.test(query.trim());
+      // Check if query is a template ID (exactly 13 digits)
+      const isTemplateId = /^\d{13}$/.test(query.trim());
       if (isTemplateId) {
         searchByTemplateId(query.trim());
       } else {
@@ -165,8 +165,8 @@ const Search = () => {
         console.error('Error showing rewarded ad:', error);
       }
       
-      // Check if it's a template ID (numeric only)
-      const isTemplateId = /^\d+$/.test(trimmedQuery);
+      // Check if it's a template ID (exactly 13 digits)
+      const isTemplateId = /^\d{13}$/.test(trimmedQuery);
       
       if (isTemplateId) {
         // Directly search by template ID
