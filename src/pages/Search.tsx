@@ -156,13 +156,25 @@ const Search = () => {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
+    const trimmedQuery = searchQuery.trim();
+    
+    if (trimmedQuery) {
       try {
         await adMobService.showRewardedInterstitial();
       } catch (error: any) {
         console.error('Error showing rewarded ad:', error);
       }
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      
+      // Check if it's a template ID (numeric only)
+      const isTemplateId = /^\d+$/.test(trimmedQuery);
+      
+      if (isTemplateId) {
+        // Directly search by template ID
+        await searchByTemplateId(trimmedQuery);
+      } else {
+        // Navigate to search results for text query
+        navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`);
+      }
     }
   };
 
