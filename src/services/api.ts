@@ -204,11 +204,23 @@ export class ApiService {
           throw new Error('Failed to fetch template detail');
         }
 
-        const data: ApiResponse = await response.json();
+        const rawData: any = await response.json();
+        
+        // The detail API returns {status: "success", data: {...}} format
+        // Convert it to our standard ApiResponse format
+        const data: ApiResponse = {
+          ret: rawData.status === 'success' ? 'success' : 'error',
+          errmsg: rawData.status === 'success' ? '' : 'Failed to fetch',
+          data: {
+            total: rawData.data?.video_templates?.length || 0,
+            video_templates: rawData.data?.video_templates || [],
+            has_more: false,
+          }
+        };
         
         // Ensure data structure is valid
         if (!data.data || !data.data.video_templates || data.data.video_templates.length === 0) {
-          console.error('Invalid response structure:', data);
+          console.error('Invalid response structure:', rawData);
           return {
             ret: 'error',
             errmsg: 'Template not found',
@@ -227,6 +239,7 @@ export class ApiService {
         return data;
       } catch (error) {
         lastError = error as Error;
+        console.error(`Attempt ${attempt + 1} failed:`, error);
         if (attempt < retries - 1) {
           // Wait before retrying (exponential backoff)
           await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
