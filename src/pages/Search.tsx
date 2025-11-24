@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { adMobService } from "@/services/admob";
 import { toast } from "@/hooks/use-toast";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { extractTemplateId, isTemplateId } from "@/lib/templateIdExtractor";
 
 const Search = () => {
   const [searchParams] = useSearchParams();
@@ -47,10 +48,15 @@ const Search = () => {
   useEffect(() => {
     if (query) {
       setSearchQuery(query);
-      // Check if query is a template ID (exactly 13 digits)
-      const isTemplateId = /^\d{13}$/.test(query.trim());
-      if (isTemplateId) {
-        searchByTemplateId(query.trim());
+      // Extract template ID from various formats (19 digits)
+      const extractedId = extractTemplateId(query);
+      if (extractedId) {
+        toast({
+          title: "Fetching template details...",
+          description: `Template ID: ${extractedId}`,
+          duration: 2000,
+        });
+        searchByTemplateId(extractedId);
       } else {
         searchTemplates(query);
       }
@@ -186,12 +192,12 @@ const Search = () => {
         console.error('Error showing rewarded ad:', error);
       }
       
-      // Check if it's a template ID (exactly 13 digits)
-      const isTemplateId = /^\d{13}$/.test(trimmedQuery);
-      
-      if (isTemplateId) {
+      // Extract template ID from various formats (19 digits)
+      const extractedId = extractTemplateId(trimmedQuery);
+
+      if (extractedId) {
         // Directly search by template ID
-        await searchByTemplateId(trimmedQuery);
+        await searchByTemplateId(extractedId);
       } else {
         // Navigate to search results for text query
         navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`);
