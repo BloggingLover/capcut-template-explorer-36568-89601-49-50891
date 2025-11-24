@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Search as SearchIcon } from "lucide-react";
+import { ArrowLeft, Search as SearchIcon, Clipboard } from "lucide-react";
 import { ApiService, VideoTemplate } from "@/services/api";
 import { TemplateCard } from "@/components/TemplateCard";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -154,6 +154,27 @@ const Search = () => {
     setDisplayedCount(TEMPLATES_PER_PAGE);
   };
 
+  const handlePasteFromClipboard = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        setSearchQuery(text.trim());
+        toast({
+          description: "Pasted from clipboard",
+          duration: 2000,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to read clipboard:', error);
+      toast({
+        title: "Clipboard access denied",
+        description: "Please paste manually",
+        variant: "destructive",
+        duration: 2000,
+      });
+    }
+  };
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedQuery = searchQuery.trim();
@@ -230,15 +251,26 @@ const Search = () => {
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="max-w-2xl">
             <div className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="Search templates..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 h-12 bg-white/10 border-white/20 text-white placeholder:text-white/60"
-              />
-              <Button type="submit" size="lg" variant="secondary" className="h-12">
-                Search
+              <div className="relative flex-1">
+                <Input
+                  type="text"
+                  placeholder="Search templates..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-12 bg-white/10 border-white/20 text-white placeholder:text-white/60 pr-12"
+                />
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  onClick={handlePasteFromClipboard}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 text-white hover:bg-white/10"
+                >
+                  <Clipboard className="w-5 h-5" />
+                </Button>
+              </div>
+              <Button type="submit" size="lg" variant="secondary" className="h-12 w-12 p-0">
+                <SearchIcon className="w-5 h-5" />
               </Button>
             </div>
           </form>
