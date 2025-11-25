@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Search as SearchIcon, Clipboard } from "lucide-react";
 import { ApiService, VideoTemplate } from "@/services/api";
@@ -24,6 +24,7 @@ const Search = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const query = searchParams.get('q') || '';
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Filter states
   const [sortBy, setSortBy] = useState('default');
@@ -172,11 +173,11 @@ const Search = () => {
       }
     } catch (error) {
       console.error('Failed to read clipboard:', error);
+      // Focus the input so user can paste manually with Ctrl+V
+      searchInputRef.current?.focus();
       toast({
-        title: "Clipboard access denied",
-        description: "Please paste manually",
-        variant: "destructive",
-        duration: 2000,
+        description: "Input focused - Press Ctrl+V to paste",
+        duration: 2500,
       });
     }
   };
@@ -259,6 +260,7 @@ const Search = () => {
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Input
+                  ref={searchInputRef}
                   type="text"
                   placeholder="Search templates..."
                   value={searchQuery}
