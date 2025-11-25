@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Search, Clipboard } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { Clipboard as CapClipboard } from "@capacitor/clipboard";
 import { ApiService, categories, VideoTemplate } from "@/services/api";
 import { adMobService } from "@/services/admob";
 import { TemplateCard } from "@/components/TemplateCard";
@@ -96,20 +98,39 @@ const Home = () => {
 
   const handlePasteFromClipboard = async () => {
     try {
-      const text = await navigator.clipboard.readText();
+      let text = "";
+      
+      if (Capacitor.isNativePlatform()) {
+        // Native clipboard for Android/iOS
+        const { value } = await CapClipboard.read();
+        text = value || "";
+      } else if (navigator.clipboard && navigator.clipboard.readText) {
+        // Web / browser fallback
+        text = await navigator.clipboard.readText();
+      }
+
       if (text) {
         setSearchQuery(text.trim());
         toast({
           description: "Pasted from clipboard",
           duration: 2000,
         });
+        return;
       }
+
+      // Fallback: focus field and guide user
+      searchInputRef.current?.focus();
+      const isMobile = Capacitor.isNativePlatform() || /Android|iPhone|iPad/i.test(navigator.userAgent);
+      toast({
+        description: isMobile ? "Long-press in the field and tap Paste" : "Input focused - Press Ctrl+V to paste",
+        duration: 2500,
+      });
     } catch (error) {
       console.error('Failed to read clipboard:', error);
-      // Focus the input so user can paste manually with Ctrl+V
       searchInputRef.current?.focus();
+      const isMobile = Capacitor.isNativePlatform() || /Android|iPhone|iPad/i.test(navigator.userAgent);
       toast({
-        description: "Input focused - Press Ctrl+V to paste",
+        description: isMobile ? "Long-press in the field and tap Paste" : "Input focused - Press Ctrl+V to paste",
         duration: 2500,
       });
     }
